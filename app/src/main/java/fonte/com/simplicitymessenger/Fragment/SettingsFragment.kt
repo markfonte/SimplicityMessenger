@@ -22,7 +22,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
 
     companion object {
-        fun newInstance(args: Bundle) : SettingsFragment {
+        fun newInstance(args: Bundle?) : SettingsFragment {
             val frag = SettingsFragment()
             frag.arguments = args
             return frag
