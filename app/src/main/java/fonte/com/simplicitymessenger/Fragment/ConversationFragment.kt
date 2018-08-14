@@ -14,4 +14,8 @@ class ConversationFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.conversation_fragment, null)
     }
+
+    companion object {
+        val LOG_TAG: String = ConversationFragment::class.java.simpleName
+    }
 }

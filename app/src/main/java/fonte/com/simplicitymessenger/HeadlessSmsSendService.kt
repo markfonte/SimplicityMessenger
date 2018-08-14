@@ -11,8 +11,7 @@ class HeadlessSmsSendService : Service() {
         return null
     }
 
-
     companion object {
-        val LOG_TAG : String = MmsReceiver::class.java.simpleName
+        val LOG_TAG: String = HeadlessSmsSendService::class.java.simpleName
     }
 }

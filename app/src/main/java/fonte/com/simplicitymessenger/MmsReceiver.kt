@@ -11,6 +11,6 @@ class MmsReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        val LOG_TAG : String = MmsReceiver::class.java.simpleName
+        val LOG_TAG: String = MmsReceiver::class.java.simpleName
     }
 }

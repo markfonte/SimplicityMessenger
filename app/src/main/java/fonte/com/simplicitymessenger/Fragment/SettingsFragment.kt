@@ -22,6 +22,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
 
     companion object {
+        val LOG_TAG : String = SettingsFragment::class.java.simpleName
+
         fun newInstance(args: Bundle?) : SettingsFragment {
             val frag = SettingsFragment()
             frag.arguments = args

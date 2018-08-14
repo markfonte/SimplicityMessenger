@@ -8,10 +8,9 @@ import android.util.Log
 class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(LOG_TAG, context.toString() + '\n' + intent.toString())
-
     }
 
     companion object {
-        val LOG_TAG : String = MmsReceiver::class.java.simpleName
+        val LOG_TAG: String = SmsReceiver::class.java.simpleName
     }
 }
