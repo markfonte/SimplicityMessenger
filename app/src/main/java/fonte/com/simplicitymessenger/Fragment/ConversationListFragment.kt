@@ -1,6 +1,7 @@
 package fonte.com.simplicitymessenger.Fragment
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
 import android.provider.Telephony
 import android.support.v4.app.Fragment
@@ -11,11 +12,19 @@ import android.view.ViewGroup
 import fonte.com.simplicitymessenger.R
 import android.content.ContentResolver
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.telephony.SmsManager
+import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.conversation_list_fragment.*
+import java.util.jar.Manifest
 
 
 class ConversationListFragment : Fragment() {
+    private var smsList: ArrayList<String>? = null
     @SuppressLint("InflateParams")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -25,40 +34,39 @@ class ConversationListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (ContextCompat.checkSelfPermission(context!!,
-                        Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity!!,
-                            Manifest.permission.READ_CONTACTS)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(activity!!,
-                        arrayOf(Manifest.permission.READ_CONTACTS),
-                        MY_PERMISSIONS_REQUEST_READ_CONTACTS)
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-
+        val permissionCheck : Int = ContextCompat.checkSelfPermission(context!!, android.Manifest.permission.READ_SMS )
+        if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            loadConversationList()
         }
-        val cr = activity?.contentResolver
-        val c = cr?.query(Telephony.Sms.Inbox.CONTENT_URI, // Official CONTENT_URI from docs
-                arrayOf(Telephony.Sms.Inbox.BODY),
-                null, null,
-                Telephony.Sms.Inbox.DEFAULT_SORT_ORDER)// Select body text
-        // Default sort order
+        else {
+            ActivityCompat.requestPermissions(activity as Activity, arrayOf(android.Manifest.permission.READ_SMS), 100)
+        }
+    }
 
-        val totalSMS : Int? = c?.count
-        Log.d(LOG_TAG, totalSMS.toString())
-        c?.close()
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if(requestCode == 100) {
+            loadConversationList()
+        }
+        else {
+            Log.e(LOG_TAG, "Cannot be displayed without required permissions")
+        }
+    }
+
+    private fun loadConversationList() {
+        val inboxUri : Uri = Uri.parse("content://sms/inbox")
+        smsList = ArrayList(0)
+        val contentResolver : ContentResolver? = activity?.contentResolver
+        val cursor: Cursor? = contentResolver?.query(inboxUri, null, null, null, null)
+        while(cursor?.moveToNext()!!) {
+            val number: String = cursor.getString(cursor.getColumnIndexOrThrow("address"))
+
+            val body: String = cursor.getString(cursor.getColumnIndexOrThrow("body"))
+            smsList!!.add("Number: $number \nBody: $body")
+        }
+        cursor.close()
+        val adapter: ArrayAdapter<String> = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, smsList )
+        //conversation_list.adapter = adapter
     }
 
     companion object {
