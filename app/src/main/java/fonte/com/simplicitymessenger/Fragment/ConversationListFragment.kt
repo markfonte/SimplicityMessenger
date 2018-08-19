@@ -25,7 +25,7 @@ class ConversationListFragment : Fragment() {
     @SuppressLint("InflateParams")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        val rootView: View =  inflater.inflate(R.layout.conversation_list_fragment, null)
+        val rootView: View = inflater.inflate(R.layout.conversation_list_fragment, null)
         conversationListView = rootView.findViewById(R.id.conversation_list)
         return rootView
     }
@@ -37,7 +37,7 @@ class ConversationListFragment : Fragment() {
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
             loadConversationList()
         } else {
-            ActivityCompat.requestPermissions(activity as Activity, arrayOf(android.Manifest.permission.READ_SMS), 100)
+            context?.resources?.getInteger(R.integer.request_code_permission_read_sms)?.let { ActivityCompat.requestPermissions(activity as Activity, arrayOf(android.Manifest.permission.READ_SMS), it) }
         }
     }
 
@@ -46,9 +46,8 @@ class ConversationListFragment : Fragment() {
 
     }
 
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == 100) {
+        if (requestCode == context?.resources?.getInteger(R.integer.request_code_permission_read_sms)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadConversationList()
             } else {
@@ -58,14 +57,18 @@ class ConversationListFragment : Fragment() {
     }
 
     private fun loadConversationList() {
-        val inboxUri: Uri = Uri.parse("content://sms/inbox")
-        val listItems : ArrayList<String?> = ArrayList(0)
+        val inboxUri: Uri = Uri.parse("content://sms/conversations")
+        val listItems: ArrayList<String?> = ArrayList(0)
         val contentResolver: ContentResolver? = activity?.contentResolver
         val cursor: Cursor? = contentResolver?.query(inboxUri, null, null, null, null)
-        while (cursor?.moveToNext()!! ) {
-            val number: String = cursor.getString(cursor.getColumnIndexOrThrow("address"))
-            val body: String = cursor.getString(cursor.getColumnIndexOrThrow("body"))
-            listItems.add("Number: $number \nBody: $body")
+        while (cursor?.moveToNext()!!) {
+            val msg_count: String = cursor.getString(cursor.getColumnIndexOrThrow("msg_count"))
+            val snippet: String = cursor.getString(cursor.getColumnIndexOrThrow("snippet"))
+            //val number: String = cursor.getString(cursor.getColumnIndexOrThrow("address"))
+            //val body: String = cursor.getString(cursor.getColumnIndexOrThrow("body"))
+            //listItems.add("Number: $number \nBody: $body")
+            listItems.add("Message count: $msg_count \nSnippet: $snippet")
+
         }
         cursor.close()
         val adapter: ArrayAdapter<String?> = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, listItems as MutableList<String?>)
