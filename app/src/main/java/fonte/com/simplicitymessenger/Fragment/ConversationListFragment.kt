@@ -5,8 +5,8 @@ import android.app.Activity
 import android.content.ContentResolver
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
+import android.provider.Telephony
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -57,22 +57,37 @@ class ConversationListFragment : Fragment() {
     }
 
     private fun loadConversationList() {
-        val inboxUri: Uri = Uri.parse("content://sms/conversations")
         val listItems: ArrayList<String?> = ArrayList(0)
         val contentResolver: ContentResolver? = activity?.contentResolver
-        val cursor: Cursor? = contentResolver?.query(inboxUri, null, null, null, null)
-        while (cursor?.moveToNext()!!) {
-            val msg_count: String = cursor.getString(cursor.getColumnIndexOrThrow("msg_count"))
-            val snippet: String = cursor.getString(cursor.getColumnIndexOrThrow("snippet"))
-            //val number: String = cursor.getString(cursor.getColumnIndexOrThrow("address"))
-            //val body: String = cursor.getString(cursor.getColumnIndexOrThrow("body"))
+        //val cursor: Cursor? = contentResolver?.query(Telephony.Sms.CONTENT_URI, arrayOf("*"), null, null, Telephony.Sms.DEFAULT_SORT_ORDER)
+        val cursor: Cursor? = contentResolver?.query(Telephony.Sms.Conversations.CONTENT_URI, null, null, null, Telephony.Sms.Conversations.DEFAULT_SORT_ORDER)
+        var i = 0
+        while (cursor?.moveToNext()!! && i < 1000) {
+            val threadId: String = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.Conversations.THREAD_ID))
+            val contactName: String = findContactByThreadId(threadId)
+            val messageCount: String = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.Conversations.MESSAGE_COUNT))
+            val snippet: String = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.Conversations.SNIPPET))
+            //val number: String = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.ADDRESS))
+            //val body: String = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.BODY))
             //listItems.add("Number: $number \nBody: $body")
-            listItems.add("Message count: $msg_count \nSnippet: $snippet")
-
+            listItems.add("Contact: $contactName\nMessage count: $messageCount\nSnippet: $snippet")
+            ++i
         }
         cursor.close()
         val adapter: ArrayAdapter<String?> = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, listItems as MutableList<String?>)
         conversationListView?.adapter = adapter
+    }
+
+    private fun findContactByThreadId(threadId: String): String {
+        val contentResolver: ContentResolver? = activity?.contentResolver
+        val cursor: Cursor? = contentResolver?.query(Telephony.Sms.Inbox.CONTENT_URI, null, "thread_id=$threadId", null, null)
+        var result = getString(R.string.default_contact_name)
+        if (cursor?.count!! > 0) {
+            cursor.moveToFirst()
+            result = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.Inbox.ADDRESS))
+        }
+        cursor.close()
+        return result
     }
 
     companion object {
