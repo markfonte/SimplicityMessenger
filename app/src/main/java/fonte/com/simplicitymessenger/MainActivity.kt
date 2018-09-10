@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val defaultMessengerDialogFragment = DefaultMessengerDialogFragment()
             defaultMessengerDialogFragment.show(supportFragmentManager, DefaultMessengerDialogFragment.LOG_TAG)
         }
+
+
     }
 
     override fun onBackPressed() {

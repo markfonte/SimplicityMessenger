@@ -2,6 +2,7 @@ package fonte.com.simplicitymessenger.Fragment
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.AsyncQueryHandler
 import android.content.ContentResolver
 import android.content.pm.PackageManager
 import android.database.Cursor
